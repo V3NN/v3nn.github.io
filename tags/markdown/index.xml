@@ -1,0 +1,37 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>Markdown - Tag - V3NN</title>
+        <link>http://example.org/tags/markdown/</link>
+        <description>Markdown - Tag - V3NN</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sun, 01 Dec 2019 21:57:40 &#43;0800</lastBuildDate><atom:link href="http://example.org/tags/markdown/" rel="self" type="application/rss+xml" /><item>
+    <title>Markdown 基本语法</title>
+    <link>http://example.org/posts/my-first-post/</link>
+    <pubDate>Sun, 01 Dec 2019 21:57:40 &#43;0800</pubDate>
+    <author>Dillon</author>
+    <guid>http://example.org/posts/my-first-post/</guid>
+    <description><![CDATA[这篇文章提供了可以在 Hugo 的文章中使用的基本 Markdown 语法示例.
+Note 这篇文章借鉴了一篇很棒的来自 Grav 的文章 .
+如果你想了解 Loveit 主题的扩展 Markdown 语法, 请阅读扩展 Markdown 语法页面 .
+事实上, 编写 Web 内容很麻烦. <strong><ruby>WYSIWYG<rt>所见即所得</rt></ruby></strong> 编辑器帮助减轻了这一任务. 但通常会导致代码太糟, 或更糟糕的是, 网页也会很丑.
+没有通常伴随的所有复杂和丑陋的问题, Markdown 是一种更好的生成 HTML 内容的方式.
+一些主要好处是:
+Markdown 简单易学, 几乎没有多余的字符, 因此编写内容也更快. 用 Markdown 书写时出错的机会更少. 可以产生有效的 XHTML 输出. 将内容和视觉显示保持分开, 这样就不会打乱网站的外观. 可以在你喜欢的任何文本编辑器或 Markdown 应用程序中编写内容. Markdown 使用起来很有趣! John Gruber, Markdown 的作者如是说:
+The Stormtroopocat The Stormtroopocat 1 标题 从 h2 到 h6 的标题在每个级别上都加上一个 ＃:
+## h2 标题 ### h3 标题 #### h4 标题 ##### h5 标题 ###### h6 标题 2 注释 注释是和 HTML 兼容的：]]></description>
+</item>
+<item>
+    <title>Markdown 基本语法2</title>
+    <link>http://example.org/posts/my-first-post-%E5%89%AF%E6%9C%AC/</link>
+    <pubDate>Sun, 01 Dec 2019 21:57:40 &#43;0800</pubDate>
+    <author>Dillon</author>
+    <guid>http://example.org/posts/my-first-post-%E5%89%AF%E6%9C%AC/</guid>
+    <description><![CDATA[这篇文章提供了可以在 Hugo 的文章中使用的基本 Markdown 语法示例.
+Note 这篇文章借鉴了一篇很棒的来自 Grav 的文章 .
+如果你想了解 Loveit 主题的扩展 Markdown 语法, 请阅读扩展 Markdown 语法页面 .
+事实上, 编写 Web 内容很麻烦. <strong><ruby>WYSIWYG<rt>所见即所得</rt></ruby></strong> 编辑器帮助减轻了这一任务. 但通常会导致代码太糟, 或更糟糕的是, 网页也会很丑.
+没有通常伴随的所有复杂和丑陋的问题, Markdown 是一种更好的生成 HTML 内容的方式.
+一些主要好处是:
+Markdown 简单易学, 几乎没有多余的字符, 因此编写内容也更快. 用 Markdown 书写时出错的机会更少. 可以产生有效的 XHTML 输出. 将内容和视觉显示保持分开, 这样就不会打乱网站的外观. 可以在你喜欢的任何文本编辑器或 Markdown 应用程序中编写内容. Markdown 使用起来很有趣! John Gruber, Markdown 的作者如是说:]]></description>
+</item>
+</channel>
+</rss>
