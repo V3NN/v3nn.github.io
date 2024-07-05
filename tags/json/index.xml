@@ -4,7 +4,7 @@
         <link>http://example.org/tags/json/</link>
         <description>JSON - Tag - V3NN</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Fri, 01 Dec 2023 00:00:00 &#43;0000</lastBuildDate><atom:link href="http://example.org/tags/json/" rel="self" type="application/rss+xml" /><item>
-    <title>一问了解MySQL JSON相关函数</title>
+    <title>一文了解MySQL JSON相关函数</title>
     <link>http://example.org/posts/mysql/json-function-reference/</link>
     <pubDate>Fri, 01 Dec 2023 00:00:00 &#43;0000</pubDate>
     <author>Author</author>
