@@ -4,6 +4,7 @@
     ><url>
             <loc>http://example.org/posts/rabbitmq/one/</loc><lastmod>2024-07-01T00:00:00&#43;00:00</lastmod></url><url>
             <loc>http://example.org/posts/mysql/json-function-reference/</loc><lastmod>2023-12-01T00:00:00&#43;00:00</lastmod></url><url>
+            <loc>http://example.org/posts/redis/taotaijizhi/</loc><lastmod>2023-07-11T00:00:00&#43;00:00</lastmod></url><url>
             <loc>http://example.org/posts/my-first-post/</loc><lastmod>2020-01-01T16:45:40&#43;08:00</lastmod></url><url>
             <loc>http://example.org/categories/</loc><lastmod>2024-07-01T00:00:00&#43;00:00</lastmod></url><url>
             <loc>http://example.org/posts/</loc><lastmod>2024-07-01T00:00:00&#43;00:00</lastmod></url><url>
@@ -14,6 +15,8 @@
             <loc>http://example.org/tags/json/</loc><lastmod>2023-12-01T00:00:00&#43;00:00</lastmod></url><url>
             <loc>http://example.org/tags/mysql/</loc><lastmod>2023-12-01T00:00:00&#43;00:00</lastmod></url><url>
             <loc>http://example.org/categories/mysql/</loc><lastmod>2023-12-01T00:00:00&#43;00:00</lastmod></url><url>
+            <loc>http://example.org/tags/redis/</loc><lastmod>2023-07-11T00:00:00&#43;00:00</lastmod></url><url>
+            <loc>http://example.org/categories/redis/</loc><lastmod>2023-07-11T00:00:00&#43;00:00</lastmod></url><url>
             <loc>http://example.org/tags/html/</loc><lastmod>2020-01-01T16:45:40&#43;08:00</lastmod></url><url>
             <loc>http://example.org/tags/markdown/</loc><lastmod>2020-01-01T16:45:40&#43;08:00</lastmod></url><url>
             <loc>http://example.org/categories/markdown/</loc><lastmod>2020-01-01T16:45:40&#43;08:00</lastmod></url></urlset>
