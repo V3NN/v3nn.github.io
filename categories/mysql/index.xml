@@ -5,17 +5,11 @@
         <description>MySQL - Category - V3NN</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Fri, 01 Dec 2023 00:00:00 &#43;0000</lastBuildDate><atom:link href="http://example.org/categories/mysql/" rel="self" type="application/rss+xml" /><item>
     <title>一文了解MySQL JSON相关函数</title>
-    <link>http://example.org/posts/mysql/json-function-reference/</link>
+    <link>http://example.org/posts/mysql/jsonfunction/</link>
     <pubDate>Fri, 01 Dec 2023 00:00:00 &#43;0000</pubDate>
     <author>Author</author>
-    <guid>http://example.org/posts/mysql/json-function-reference/</guid>
-    <description><![CDATA[1. 介绍 JSON(JavaScript Object Notation) 是一种轻量级的数据交换格式，目前常用于前后段数据传输。
-MySQL 从 5.7.8 版本开始提供 JSON 数据类型及相关函数，其通过新增JSON对象类型和相应的函数来解析和生成 JSON格式数据，使得 MySQL 在处理 JSON数据方面更加高效便捷，以下介绍常用相关函数。
-2. 创建JSON JSON_ARRAY JSON_ARRAY([val[, val] ...])
-接受一个值列表(可能为NULL)，并返回一个包含这些值的 JSON 数组
-mysql&gt; SELECT JSON_ARRAY(1, &#34;abc&#34;, NULL, TRUE, CURTIME()); +---------------------------------------------+ | JSON_ARRAY(1, &#34;abc&#34;, NULL, TRUE, CURTIME()) | +---------------------------------------------+ | [1, &#34;abc&#34;, null, true, &#34;11:30:24.000000&#34;] | +---------------------------------------------+ JSON_OBJECT JSON_OBJECT([key, val[, key, val] ...])
-接受一个键值对(可以为NULL)列表，并返回一个包含这些键值对的 JSON 对象
-mysql&gt; SELECT JSON_OBJECT(&#39;id&#39;, 87, &#39;name&#39;, &#39;carrot&#39;, &#39;addr&#39;, null); +--------------------------------------------------------------+ | SELECT JSON_OBJECT(&#39;id&#39;, 87, &#39;name&#39;, &#39;carrot&#39;, &#39;addr&#39;, null) | +--------------------------------------------------------------+ | {&#34;id&#34;: 87, &#34;addr&#34;: null, &#34;name&#34;: &#34;carrot&#34;} | +--------------------------------------------------------------+ 3.]]></description>
+    <guid>http://example.org/posts/mysql/jsonfunction/</guid>
+    <description><![CDATA[1. 介绍 JSON(JavaScript Object Notation) 是一种轻量级的数据交换格式，目前常用于前后段数据传输。 MySQL 从 5.7.8 版本开始提供 JSON 数据类型及相关函数，其通过新增JSON对象类型和相应的]]></description>
 </item>
 </channel>
 </rss>

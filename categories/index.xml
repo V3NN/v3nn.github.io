@@ -28,6 +28,14 @@
     <description><![CDATA[]]></description>
 </item>
 <item>
+    <title>Life</title>
+    <link>http://example.org/categories/life/</link>
+    <pubDate>Tue, 11 May 2021 00:00:00 &#43;0000</pubDate>
+    <author>V3NN</author>
+    <guid>http://example.org/categories/life/</guid>
+    <description><![CDATA[]]></description>
+</item>
+<item>
     <title>Markdown</title>
     <link>http://example.org/categories/markdown/</link>
     <pubDate>Sun, 01 Dec 2019 21:57:40 &#43;0800</pubDate>
