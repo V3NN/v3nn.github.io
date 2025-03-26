@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>RabbitMQ 延迟队列 - V3NN</title><meta name="Description" content="."><meta property="og:title" content="RabbitMQ 延迟队列" />
+<meta property="og:description" content="." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://example.org/posts/rabbitmq/rabbitmq%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/" /><meta property="og:image" content="http://example.org/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2025-03-26T00:00:00+00:00" />
+<meta property="article:modified_time" content="2025-03-26T00:00:00+00:00" /><meta property="og:site_name" content="我的网站" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://example.org/logo.png"/>
+
+<meta name="twitter:title" content="RabbitMQ 延迟队列"/>
+<meta name="twitter:description" content="."/>
+<meta name="application-name" content="My cool site">
+<meta name="apple-mobile-web-app-title" content="My cool site"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://example.org/posts/rabbitmq/rabbitmq%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/" /><link rel="prev" href="http://example.org/posts/rabbitmq/one/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "RabbitMQ 延迟队列",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/example.org\/posts\/rabbitmq\/rabbitmq%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97\/"
+        },"genre": "posts","keywords": "RabbitMQ","wordcount":  2615 ,
+        "url": "http:\/\/example.org\/posts\/rabbitmq\/rabbitmq%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97\/","datePublished": "2025-03-26T00:00:00+00:00","dateModified": "2025-03-26T00:00:00+00:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "v3nn"
+            },"description": "."
+    }
+    </script></head>
+    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="V3NN">V3NN</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="V3NN">V3NN</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+            </a></div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content always-active" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">RabbitMQ 延迟队列</h1><div class="post-meta">
+            
+            <div class="post-meta-line">
+</div>
+        </div><div class="details toc" id="toc-static"  data-kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#11概述">1.1概述</a></li>
+    <li><a href="#12为什么要使用延时队列">1.2为什么要使用延时队列</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#21-实现方式">2.1 实现方式</a></li>
+    <li><a href="#22-优缺点分析">2.2 优缺点分析</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#31-ttl--dlx">3.1 TTL + DLX</a></li>
+    <li><a href="#32-延迟插件">3.2 延迟插件</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h1 id="1基本介绍">1、基本介绍</h1>
+<h2 id="11概述">1.1概述</h2>
+<p>延时队列是一种队列，内部的元素是有序的，元素出队和入队室友方向性的（元素从一端进入、从另一端取出）。跟普通的队列不一样的是，普通队列中的元素总是等着希望被早点取出处理，而延时队列中的元素则是希望被在指定时间得到取出和处理，所以延时队列中的元素是都是带时间属性的，通常来说是需要被处理的消息或者任务。</p>
+<h2 id="12为什么要使用延时队列">1.2为什么要使用延时队列</h2>
+<p>假设有如下场景：</p>
+<ul>
+<li>订单在十分钟之内未支付则自动取消</li>
+<li>用户发起投诉，如果一天内没有得到处理则通知相关人员</li>
+<li>用户注册后，如果三天内未进行登录则进行短信提醒</li>
+<li>&hellip;.</li>
+</ul>
+<p>如上这些场景都有一个特点，<strong>需要在某个时间发生之后或者发生之前的指定时间完成某一项任务</strong>。如订单生成后的十分钟内检查订单支付状态，将未支付的订单进行关闭。</p>
+<p>当然除了延时队列，也可以有一些其他办法实现。比如使用定时任务，一直轮询数据，每秒查一次去除需要被处理的数据处理就完事了。</p>
+<p>如果<strong>数据量比较少</strong>，确实可以这样做，但对于<strong>数据量比较大并且时效较强的场景</strong>，短期内未支付的订单可能会很多，对庞大的数据量仍旧使用轮询的方式是不可取的，很可能在一秒内无法完成所有订单的检查，同时会给数据库带来很大压力，无法满足业务要求而且性能低下。</p>
+<h1 id="2原理">2、原理</h1>
+<h2 id="21-实现方式">2.1 实现方式</h2>
+<p><code>RabbitMQ</code> 实现延迟队列有以下两种实现方式：</p>
+<ul>
+<li><strong>通过TTL + 死信队列实现延迟任务</strong></li>
+</ul>
+<p>原队列（正常队列）不设置消费者，当消息在原队列中达到 TTL 后，由于还未被消费会被转发到绑定的死信交换器，消费者从死信队列中消费消息，从而实现消息的延迟处理。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/posts/rabbitMQ/delayed/1.png"
+        data-srcset="/images/posts/rabbitMQ/delayed/1.png, /images/posts/rabbitMQ/delayed/1.png 1.5x, /images/posts/rabbitMQ/delayed/1.png 2x"
+        data-sizes="auto"
+        alt="/images/posts/rabbitMQ/delayed/1.png"
+        title="1" /></p>
+<p>需要注意的是，因为队列先进先出的特点， 如果消息延时的时间不同，例如第一条消息延时10S、第二条消息延时5S、第三条消息延时1S，后面的消息需要等待第一条消息（延时10S）消费完才能消费，当第一条消息未被消费则后续的消息都会被阻塞，即使消息设置了更短的延时。</p>
+<p>如果一个队列中的消息延迟时间都一致，就可以避免这个问题，因此可以针对不同的延迟时间对应多创建几个队列。</p>
+<ul>
+<li><strong>通过官方提供的延迟插件实现延迟功能</strong></li>
+</ul>
+<p>通过创建一个延迟交换机（<code>Delay Exchange</code>），延迟消息首先会把消息投递到延迟交换机，并不是直接将消息投递业务队列（所以不会立即执行），而是存储到<code>Mnesia</code> ( <code>Erlang</code> 运行时中自带的一个数据库管理系统），等到消息到达可投递时间才会被投递到目标队列中，从而实现延迟队列。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/images/posts/rabbitMQ/delayed/2.png"
+        data-srcset="/images/posts/rabbitMQ/delayed/2.png, /images/posts/rabbitMQ/delayed/2.png 1.5x, /images/posts/rabbitMQ/delayed/2.png 2x"
+        data-sizes="auto"
+        alt="/images/posts/rabbitMQ/delayed/2.png"
+        title="2" /></p>
+<h2 id="22-优缺点分析">2.2 优缺点分析</h2>
+<ul>
+<li>
+<p><strong>使用死信队列存在时序问题，它不能实现随机延迟任务，每个无消费者的队列上只能设置一个 <code>TTL</code>，所以只能实现固定过期时间的延迟任务。</strong></p>
+</li>
+<li>
+<p><strong>使用延迟插件则存在消息丢失问题以及高并发问题</strong></p>
+<ul>
+<li>消息丢失：消息在真的被投递到目标消息队列之前，是存放在接收到了这个消息的服务端本地的 <code>Mnesia</code> 里面。也就是说，如果这个时候还没有刷新磁盘，那么消息就会丢失；如果这个节点不可用了，那么消息也同样会丢失。</li>
+<li>高并发问题：这种实现方式不支持高并发场景，因为它只有一个延迟交换机，当高并发或数据量比较大时执行效率就会比较低。</li>
+</ul>
+</li>
+</ul>
+<h1 id="3代码示例">3、代码示例</h1>
+<p><strong>以下示例使用<code>Docker</code>运行<code>RabbitMQ</code>，<code>PHP</code>进行代码编写并已安装<code>RabbitMQ</code>相应扩展</strong></p>
+<h2 id="31-ttl--dlx">3.1 TTL + DLX</h2>
+<p>编写生产者代码</p>
+<p><strong>producer.php</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="o">&lt;?</span><span class="nx">php</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">require_once</span>  <span class="s1">&#39;../vendor/autoload.php&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">use</span> <span class="nx">PhpAmqpLib\Connection\AMQPStreamConnection</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">use</span> <span class="nx">PhpAmqpLib\Message\AMQPMessage</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">$connection</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">AMQPStreamConnection</span><span class="p">(</span><span class="s1">&#39;rabbitmq&#39;</span><span class="p">,</span> <span class="mi">5672</span><span class="p">,</span> <span class="s1">&#39;rabbit&#39;</span><span class="p">,</span> <span class="s1">&#39;rabbit&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$channel</span> <span class="o">=</span> <span class="nv">$connection</span><span class="o">-&gt;</span><span class="na">channel</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 定义正常交换机和队列（带TTL和DLX）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nv">$delayExchange</span> <span class="o">=</span> <span class="s1">&#39;normal_exchange&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$delayQueue</span> <span class="o">=</span> <span class="s1">&#39;delay_queue&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$dlxExchange</span> <span class="o">=</span> <span class="s1">&#39;dlx_exchange&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$targetQueue</span> <span class="o">=</span> <span class="s1">&#39;target_queue&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 10秒延迟（单位毫秒）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nv">$delay</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 声明死信交换机
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">exchange_declare</span><span class="p">(</span><span class="nv">$dlxExchange</span><span class="p">,</span> <span class="s1">&#39;direct&#39;</span><span class="p">,</span> <span class="k">false</span><span class="p">,</span> <span class="k">true</span><span class="p">,</span> <span class="k">false</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 声明目标队列
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">queue_declare</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$targetQueue</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">false</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">true</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">false</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">false</span>
+</span></span><span class="line"><span class="cl"><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">queue_bind</span><span class="p">(</span><span class="nv">$targetQueue</span><span class="p">,</span> <span class="nv">$dlxExchange</span><span class="p">,</span> <span class="s1">&#39;dlx_routing_key&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 声明延迟队列（设置TTL和DLX）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nv">$args</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\PhpAmqpLib\Wire\AMQPTable</span><span class="p">([</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;x-dead-letter-exchange&#39;</span> <span class="o">=&gt;</span> <span class="nv">$dlxExchange</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;x-dead-letter-routing-key&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;dlx_routing_key&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;x-message-ttl&#39;</span> <span class="o">=&gt;</span> <span class="nv">$delay</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">exchange_declare</span><span class="p">(</span><span class="nv">$delayExchange</span><span class="p">,</span> <span class="s1">&#39;direct&#39;</span><span class="p">,</span> <span class="k">false</span><span class="p">,</span> <span class="k">true</span><span class="p">,</span> <span class="k">false</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">queue_declare</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$delayQueue</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">false</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">true</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">false</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="k">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$args</span>
+</span></span><span class="line"><span class="cl"><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">queue_bind</span><span class="p">(</span><span class="nv">$delayQueue</span><span class="p">,</span> <span class="nv">$delayExchange</span><span class="p">,</span> <span class="s1">&#39;delay_key&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">$messageBody</span> <span class="o">=</span> <span class="s1">&#39;Hello Delayed Message!&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 发送延迟消息
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nv">$message</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">AMQPMessage</span><span class="p">(</span><span class="nv">$messageBody</span><span class="p">,</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;delivery_mode&#39;</span> <span class="o">=&gt;</span> <span class="nx">AMQPMessage</span><span class="o">::</span><span class="na">DELIVERY_MODE_PERSISTENT</span>
+</span></span><span class="line"><span class="cl"><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">basic_publish</span><span class="p">(</span><span class="nv">$message</span><span class="p">,</span> <span class="nv">$delayExchange</span><span class="p">,</span> <span class="s1">&#39;delay_key&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">echo</span> <span class="s2">&#34;Sent </span><span class="si">{</span><span class="nv">$messageBody</span><span class="si">}</span><span class="s2"> with delay </span><span class="si">{</span><span class="nv">$delay</span><span class="si">}</span><span class="s2">ms </span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$datetime</span> <span class="o">=</span> <span class="nx">date</span><span class="p">(</span><span class="s1">&#39;Y/m/d H:i:s&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">echo</span> <span class="s2">&#34;成功发送延迟消息 : </span><span class="si">{</span><span class="nv">$messageBody</span><span class="si">}</span><span class="s2"> , </span><span class="si">{</span><span class="nv">$datetime</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">close</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$connection</span><span class="o">-&gt;</span><span class="na">close</span><span class="p">();</span>
+</span></span></code></pre></div><p>编写消费者代码</p>
+<p><strong>consume.php</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="o">&lt;?</span><span class="nx">php</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">require_once</span>  <span class="s1">&#39;../vendor/autoload.php&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">use</span> <span class="nx">PhpAmqpLib\Connection\AMQPStreamConnection</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">$connection</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">AMQPStreamConnection</span><span class="p">(</span><span class="s1">&#39;rabbitmq&#39;</span><span class="p">,</span> <span class="mi">5672</span><span class="p">,</span> <span class="s1">&#39;rabbit&#39;</span><span class="p">,</span> <span class="s1">&#39;rabbit&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$channel</span> <span class="o">=</span> <span class="nv">$connection</span><span class="o">-&gt;</span><span class="na">channel</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">$targetQueue</span> <span class="o">=</span> <span class="s1">&#39;target_queue&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">echo</span> <span class="s2">&#34;正在等待延迟队列消息, waiting... </span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$callback</span> <span class="o">=</span> <span class="k">function</span> <span class="p">(</span><span class="nv">$message</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">echo</span> <span class="nv">$message</span><span class="o">-&gt;</span><span class="na">body</span> <span class="o">.</span> <span class="s1">&#39;-------&#39;</span> <span class="o">.</span> <span class="nx">date</span><span class="p">(</span><span class="s1">&#39;Y/m/d H:i:s&#39;</span><span class="p">)</span> <span class="o">.</span> <span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$message</span><span class="o">-&gt;</span><span class="na">ack</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">basic_qos</span><span class="p">(</span><span class="k">null</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="k">null</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">basic_consume</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$targetQueue</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;&#39;</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">false</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">false</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">false</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">false</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">    <span class="nv">$callback</span>
+</span></span><span class="line"><span class="cl"><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="p">(</span><span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">is_consuming</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">wait</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="c1">// 关闭连接
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">close</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$connection</span><span class="o">-&gt;</span><span class="na">close</span><span class="p">();</span>
+</span></span></code></pre></div><p>执行消费者</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">php consume.php
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 输出如下</span>
+</span></span><span class="line"><span class="cl">正在等待延迟队列消息, waiting...
+</span></span></code></pre></div><p>执行生产者发送消息</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">php producer.php
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 输出如下</span>
+</span></span><span class="line"><span class="cl">Sent Hello Delayed Message! with delay 10000ms
+</span></span><span class="line"><span class="cl">成功发送延迟消息 : Hello Delayed Message! , 2025/03/26 16:47:32
+</span></span></code></pre></div><p>十秒后会在消费端看到消息被接收</p>
+<pre tabindex="0"><code>Hello Delayed Message!-------2025/03/26 16:47:42
+</code></pre><p><strong>关键点说明</strong></p>
+<ol>
+<li>
+<p>队列参数配置</p>
+<ul>
+<li><code>x-dead-letter-exchange</code>：指定死信交换机</li>
+<li><code>x-dead-letter-routing-key</code>：死信路由键</li>
+<li><code>x-message-ttl</code>：队列级别的统一TTL设置</li>
+</ul>
+</li>
+<li>
+<p>消息级别TTL（可选）</p>
+<p>可以在发布消息时单独设置<code>TTL</code></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="nv">$message</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">AMQPMessage</span><span class="p">(</span><span class="nv">$data</span><span class="p">,</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;expiration&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;5000&#39;</span> <span class="c1">// 5秒（字符串类型）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">]);</span>
+</span></span></code></pre></div></li>
+<li>
+<p>注意事项</p>
+<ul>
+<li>队列<code>TTL</code>和消息<code>TTL</code>同时存在时，取较小的值</li>
+<li><code>RabbitMQ</code> 只会在消息到达队列头部时检查过期</li>
+<li>需要先声明死信交换机和目标队列</li>
+<li><strong>消息需要被拒绝或过期才会进入死信队列</strong></li>
+</ul>
+</li>
+</ol>
+<h2 id="32-延迟插件">3.2 延迟插件</h2>
+<p>安装对应版本的延迟插件</p>
+<p><a href="https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases" target="_blank" rel="noopener noreffer">https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases</a>
+</p>
+<ul>
+<li>进入容器后，下载对应版本插件并启用</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># 进入容器</span>
+</span></span><span class="line"><span class="cl">docker <span class="nb">exec</span> -ti rabbitmq bash
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># rabbitmq插件指定目录（不同版本镜像目录地址不同，更具自己的情况替换）</span>
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> /plugins/
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 下载插件（根据自己rabbitmq版本下载，我这里使用的v3.8.0版本）</span>
+</span></span><span class="line"><span class="cl">wget https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/3.8.0/rabbitmq_delayed_message_exchange-3.8.0.ez
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 启用插件</span>
+</span></span><span class="line"><span class="cl">rabbitmq-plugins <span class="nb">enable</span> rabbitmq_delayed_message_exchange
+</span></span></code></pre></div><ul>
+<li>重启<code>RabbitMQ</code>服务</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">docker restart rabbitmq
+</span></span></code></pre></div><ul>
+<li>检查插件是否已经启用</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># 进入容器</span>
+</span></span><span class="line"><span class="cl">docker <span class="nb">exec</span> -ti rabbitmq bash
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">rabbitmq-plugins list -e
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 输出如下</span>
+</span></span><span class="line"><span class="cl">Listing plugins with pattern <span class="s2">&#34;.*&#34;</span> ...
+</span></span><span class="line"><span class="cl"> Configured: <span class="nv">E</span> <span class="o">=</span> explicitly enabled<span class="p">;</span> <span class="nv">e</span> <span class="o">=</span> implicitly enabled
+</span></span><span class="line"><span class="cl"> <span class="p">|</span> Status: * <span class="o">=</span> running on rabbit@e38d0a8cb907
+</span></span><span class="line"><span class="cl"> <span class="p">|</span>/
+</span></span><span class="line"><span class="cl"><span class="o">[</span>E*<span class="o">]</span> rabbitmq_delayed_message_exchange 3.8.0
+</span></span><span class="line"><span class="cl"><span class="o">[</span>E*<span class="o">]</span> rabbitmq_management               3.8.34
+</span></span><span class="line"><span class="cl"><span class="o">[</span>e*<span class="o">]</span> rabbitmq_management_agent         3.8.34
+</span></span><span class="line"><span class="cl"><span class="o">[</span>e*<span class="o">]</span> rabbitmq_web_dispatch             3.8.34
+</span></span></code></pre></div><p>编写生产者代码</p>
+<p><strong>producer.php</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="o">&lt;?</span><span class="nx">php</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 以实际项目路径为准
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">require_once</span>  <span class="s1">&#39;../vendor/autoload.php&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">use</span> <span class="nx">PhpAmqpLib\Connection\AMQPStreamConnection</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">use</span> <span class="nx">PhpAmqpLib\Message\AMQPMessage</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 连接到RabbitMQ服务器
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nv">$connection</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">AMQPStreamConnection</span><span class="p">(</span><span class="s1">&#39;rabbitmq&#39;</span><span class="p">,</span> <span class="mi">5672</span><span class="p">,</span> <span class="s1">&#39;rabbit&#39;</span><span class="p">,</span> <span class="s1">&#39;rabbit&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$channel</span> <span class="o">=</span> <span class="nv">$connection</span><span class="o">-&gt;</span><span class="na">channel</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="c1">// 声明一个具有延迟插件的自定义交换机
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nv">$args</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\PhpAmqpLib\Wire\AMQPTable</span><span class="p">([</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;x-delayed-type&#39;</span> <span class="o">=&gt;</span> <span class="nx">\PhpAmqpLib\Exchange\AMQPExchangeType</span><span class="o">::</span><span class="na">FANOUT</span>
+</span></span><span class="line"><span class="cl"><span class="p">]);</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">exchange_declare</span><span class="p">(</span><span class="s1">&#39;delayed_exchange&#39;</span><span class="p">,</span> <span class="s1">&#39;x-delayed-message&#39;</span><span class="p">,</span> <span class="k">false</span><span class="p">,</span> <span class="k">true</span><span class="p">,</span> <span class="k">false</span><span class="p">,</span> <span class="k">false</span><span class="p">,</span> <span class="k">false</span><span class="p">,</span> <span class="nv">$args</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="nv">$messageBody</span> <span class="o">=</span> <span class="s1">&#39;Hello RabbitMQ!&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$delay</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">;</span> <span class="c1">// 单位是毫秒
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nv">$headers</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\PhpAmqpLib\Wire\AMQPTable</span><span class="p">([</span><span class="s1">&#39;x-delay&#39;</span> <span class="o">=&gt;</span> <span class="nv">$delay</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$message</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">AMQPMessage</span><span class="p">(</span><span class="nv">$messageBody</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;delivery_mode&#39;</span> <span class="o">=&gt;</span> <span class="mi">2</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$message</span><span class="o">-&gt;</span><span class="na">set</span><span class="p">(</span><span class="s1">&#39;application_headers&#39;</span><span class="p">,</span> <span class="nv">$headers</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="c1">// 发布消息到交换机
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">basic_publish</span><span class="p">(</span><span class="nv">$message</span><span class="p">,</span> <span class="s1">&#39;delayed_exchange&#39;</span><span class="p">,</span> <span class="s1">&#39;delayed_key&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="k">echo</span> <span class="s2">&#34;Sent </span><span class="si">{</span><span class="nv">$messageBody</span><span class="si">}</span><span class="s2"> with delay </span><span class="si">{</span><span class="nv">$delay</span><span class="si">}</span><span class="s2">ms </span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$datetime</span> <span class="o">=</span> <span class="nx">date</span><span class="p">(</span><span class="s1">&#39;Y/m/d H:i:s&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">echo</span> <span class="s2">&#34;成功发送延迟消息 : </span><span class="si">{</span><span class="nv">$messageBody</span><span class="si">}</span><span class="s2"> , </span><span class="si">{</span><span class="nv">$datetime</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="c1">// 关闭连接
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">close</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$connection</span><span class="o">-&gt;</span><span class="na">close</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">?&gt;</span><span class="err">
+</span></span></span></code></pre></div><p>编写消费者代码</p>
+<p><strong>consume.php</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="o">&lt;?</span><span class="nx">php</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 以实际项目路径为准
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">require_once</span>  <span class="s1">&#39;../vendor/autoload.php&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">use</span> <span class="nx">PhpAmqpLib\Connection\AMQPStreamConnection</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">use</span> <span class="nx">PhpAmqpLib\Message\AMQPMessage</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="c1">// 连接到RabbitMQ服务器
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nv">$connection</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">AMQPStreamConnection</span><span class="p">(</span><span class="s1">&#39;rabbitmq&#39;</span><span class="p">,</span> <span class="mi">5672</span><span class="p">,</span> <span class="s1">&#39;rabbit&#39;</span><span class="p">,</span> <span class="s1">&#39;rabbit&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$channel</span> <span class="o">=</span> <span class="nv">$connection</span><span class="o">-&gt;</span><span class="na">channel</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="c1">// 声明一个具有延迟插件的自定义交换机
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nv">$args</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\PhpAmqpLib\Wire\AMQPTable</span><span class="p">([</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;x-delayed-type&#39;</span> <span class="o">=&gt;</span> <span class="nx">\PhpAmqpLib\Exchange\AMQPExchangeType</span><span class="o">::</span><span class="na">FANOUT</span>
+</span></span><span class="line"><span class="cl"><span class="p">]);</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">exchange_declare</span><span class="p">(</span><span class="s1">&#39;delayed_exchange&#39;</span><span class="p">,</span> <span class="s1">&#39;x-delayed-message&#39;</span><span class="p">,</span> <span class="k">false</span><span class="p">,</span> <span class="k">true</span><span class="p">,</span> <span class="k">false</span><span class="p">,</span> <span class="k">false</span><span class="p">,</span> <span class="k">false</span><span class="p">,</span> <span class="nv">$args</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="c1">// 声明延迟队列
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">queue_declare</span><span class="p">(</span><span class="s1">&#39;delayed_queue&#39;</span><span class="p">,</span> <span class="k">false</span><span class="p">,</span> <span class="k">true</span><span class="p">,</span> <span class="k">false</span><span class="p">,</span> <span class="k">false</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="c1">// 绑定队列到交换机
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">queue_bind</span><span class="p">(</span><span class="s1">&#39;delayed_queue&#39;</span><span class="p">,</span> <span class="s1">&#39;delayed_exchange&#39;</span><span class="p">,</span> <span class="s1">&#39;delayed_key&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="k">echo</span> <span class="s2">&#34;正在等待延迟队列消息, waiting... </span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$callback</span> <span class="o">=</span> <span class="k">function</span> <span class="p">(</span><span class="nx">AMQPMessage</span> <span class="nv">$message</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">echo</span> <span class="nv">$message</span><span class="o">-&gt;</span><span class="na">body</span> <span class="o">.</span> <span class="s1">&#39;-------&#39;</span> <span class="o">.</span> <span class="nx">date</span><span class="p">(</span><span class="s1">&#39;Y/m/d H:i:s&#39;</span><span class="p">)</span> <span class="o">.</span> <span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$message</span><span class="o">-&gt;</span><span class="na">ack</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">basic_consume</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;delayed_queue&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;&#39;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="k">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="k">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="k">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="k">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$callback</span>
+</span></span><span class="line"><span class="cl"><span class="p">);</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="p">(</span><span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">is_consuming</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">wait</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="c1">// 关闭连接
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nv">$channel</span><span class="o">-&gt;</span><span class="na">close</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$connection</span><span class="o">-&gt;</span><span class="na">close</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">?&gt;</span><span class="err">
+</span></span></span></code></pre></div><p>启动消费者</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">php consume.php
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 输出如下</span>
+</span></span><span class="line"><span class="cl">正在等待延迟队列消息, waiting...
+</span></span></code></pre></div><p>运行生产者代码投递延时消息</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">php producer.php
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 输出如下</span>
+</span></span><span class="line"><span class="cl">Sent Hello RabbitMQ! with delay 5000ms
+</span></span><span class="line"><span class="cl">成功发送延迟消息 : Hello RabbitMQ! , 2025/03/26 17:27:38
+</span></span></code></pre></div><p>正常情况下，5秒后消费者会返回如下内容。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">Hello RabbitMQ!-------2025/03/26 17:27:43
+</span></span></code></pre></div><p>至此，延迟插件的延时效果已实现。</p>
+<h1 id="4总结">4、总结</h1>
+<ul>
+<li>
+<p><code>RabbitMQ</code> 中可以通过<code>TTL</code> + 死信队列以及官方提供的延迟插件来实现延时任务。</p>
+</li>
+<li>
+<p><code>TTL</code> + 死信队列存在时序问题，可以针对不同的延迟时间创建多个几个队列来避免。</p>
+</li>
+<li>
+<p>使用插件可以实现更细粒度的延时控制，但插件的引入可能会带来性能上的开销，并且在高并发场景下，可能会出现消息积压。</p>
+</li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2025-03-26</span>
+            </div></div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://example.org/posts/rabbitmq/rabbitmq%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/" data-hashtag="RabbitMQ"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="http://example.org/posts/rabbitmq/rabbitmq%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/" data-title="RabbitMQ 延迟队列"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://example.org/posts/rabbitmq/rabbitmq%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/" data-title="RabbitMQ 延迟队列"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@6.20.0/icons/line.svg" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://example.org/posts/rabbitmq/rabbitmq%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/" data-title="RabbitMQ 延迟队列"><i class="fab fa-weibo fa-fw" aria-hidden="true"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/rabbitmq/">RabbitMQ</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/posts/rabbitmq/one/" class="prev" rel="prev" title="RabbitMQ 系列1"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>RabbitMQ 系列1</a></div>
+</div>
+</article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2020 - 2025</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">V3NN</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
+            </a>
+        </div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.3/dist/katex.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.3/dist/contrib/copy-tex.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.3.1/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/katex@0.15.3/dist/katex.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/katex@0.15.3/dist/contrib/auto-render.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/katex@0.15.3/dist/contrib/copy-tex.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/katex@0.15.3/dist/contrib/mhchem.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":60},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":true,"left":"\\begin{equation}","right":"\\end{equation}"},{"display":true,"left":"\\begin{equation*}","right":"\\end{equation*}"},{"display":true,"left":"\\begin{align}","right":"\\end{align}"},{"display":true,"left":"\\begin{align*}","right":"\\end{align*}"},{"display":true,"left":"\\begin{alignat}","right":"\\end{alignat}"},{"display":true,"left":"\\begin{alignat*}","right":"\\end{alignat*}"},{"display":true,"left":"\\begin{gather}","right":"\\end{gather}"},{"display":true,"left":"\\begin{CD}","right":"\\end{CD}"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>
