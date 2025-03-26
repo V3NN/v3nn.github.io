@@ -114,28 +114,14 @@
 <li><strong>通过TTL + 死信队列实现延迟任务</strong></li>
 </ul>
 <p>原队列（正常队列）不设置消费者，当消息在原队列中达到 TTL 后，由于还未被消费会被转发到绑定的死信交换器，消费者从死信队列中消费消息，从而实现消息的延迟处理。</p>
-<p><img
-        class="lazyload"
-        src="/svg/loading.min.svg"
-        data-src="/images/posts/rabbitMQ/delayed/1.png"
-        data-srcset="/images/posts/rabbitMQ/delayed/1.png, /images/posts/rabbitMQ/delayed/1.png 1.5x, /images/posts/rabbitMQ/delayed/1.png 2x"
-        data-sizes="auto"
-        alt="/images/posts/rabbitMQ/delayed/1.png"
-        title="1" /></p>
+<div align="center"> <img src="/images/posts/rabbitMQ/delayed/1.png"/></div>
 <p>需要注意的是，因为队列先进先出的特点， 如果消息延时的时间不同，例如第一条消息延时10S、第二条消息延时5S、第三条消息延时1S，后面的消息需要等待第一条消息（延时10S）消费完才能消费，当第一条消息未被消费则后续的消息都会被阻塞，即使消息设置了更短的延时。</p>
 <p>如果一个队列中的消息延迟时间都一致，就可以避免这个问题，因此可以针对不同的延迟时间对应多创建几个队列。</p>
 <ul>
 <li><strong>通过官方提供的延迟插件实现延迟功能</strong></li>
 </ul>
 <p>通过创建一个延迟交换机（<code>Delay Exchange</code>），延迟消息首先会把消息投递到延迟交换机，并不是直接将消息投递业务队列（所以不会立即执行），而是存储到<code>Mnesia</code> ( <code>Erlang</code> 运行时中自带的一个数据库管理系统），等到消息到达可投递时间才会被投递到目标队列中，从而实现延迟队列。</p>
-<p><img
-        class="lazyload"
-        src="/svg/loading.min.svg"
-        data-src="/images/posts/rabbitMQ/delayed/2.png"
-        data-srcset="/images/posts/rabbitMQ/delayed/2.png, /images/posts/rabbitMQ/delayed/2.png 1.5x, /images/posts/rabbitMQ/delayed/2.png 2x"
-        data-sizes="auto"
-        alt="/images/posts/rabbitMQ/delayed/2.png"
-        title="2" /></p>
+<div align="center"> <img src="/images/posts/rabbitMQ/delayed/2.png"/></div>
 <h2 id="22-优缺点分析">2.2 优缺点分析</h2>
 <ul>
 <li>
