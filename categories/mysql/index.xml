@@ -3,7 +3,15 @@
         <title>MySQL - Category - V3NN</title>
         <link>http://example.org/categories/mysql/</link>
         <description>MySQL - Category - V3NN</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Fri, 01 Dec 2023 00:00:00 &#43;0000</lastBuildDate><atom:link href="http://example.org/categories/mysql/" rel="self" type="application/rss+xml" /><item>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Mon, 02 Dec 2024 00:00:00 &#43;0000</lastBuildDate><atom:link href="http://example.org/categories/mysql/" rel="self" type="application/rss+xml" /><item>
+    <title>MySQL索引失效的几种情况</title>
+    <link>http://example.org/posts/mysql/%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/</link>
+    <pubDate>Mon, 02 Dec 2024 00:00:00 &#43;0000</pubDate>
+    <author>Author</author>
+    <guid>http://example.org/posts/mysql/%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/</guid>
+    <description><![CDATA[在MySQL中，索引是提高数据库查询效率的关键组件。然而在某些情况下索引可能会失效，导致查询性能下降。 以下是几种常见的索引失效情况： 模糊查询]]></description>
+</item>
+<item>
     <title>一文了解MySQL JSON相关函数</title>
     <link>http://example.org/posts/mysql/jsonfunction/</link>
     <pubDate>Fri, 01 Dec 2023 00:00:00 &#43;0000</pubDate>

@@ -12,11 +12,19 @@
     <description><![CDATA[1、基本介绍 1.1概述 延时队列是一种队列，内部的元素是有序的，元素出队和入队室友方向性的（元素从一端进入、从另一端取出）。跟普通的队列不一样]]></description>
 </item>
 <item>
-    <title>RabbitMQ 系列1</title>
-    <link>http://example.org/posts/rabbitmq/one/</link>
+    <title>MySQL索引失效的几种情况</title>
+    <link>http://example.org/posts/mysql/%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/</link>
+    <pubDate>Mon, 02 Dec 2024 00:00:00 &#43;0000</pubDate>
+    <author>Author</author>
+    <guid>http://example.org/posts/mysql/%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/</guid>
+    <description><![CDATA[在MySQL中，索引是提高数据库查询效率的关键组件。然而在某些情况下索引可能会失效，导致查询性能下降。 以下是几种常见的索引失效情况： 模糊查询]]></description>
+</item>
+<item>
+    <title>RabbitMQ 基础概念及用法</title>
+    <link>http://example.org/posts/rabbitmq/%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95/</link>
     <pubDate>Mon, 01 Jul 2024 00:00:00 &#43;0000</pubDate>
     <author>v3nn</author>
-    <guid>http://example.org/posts/rabbitmq/one/</guid>
+    <guid>http://example.org/posts/rabbitmq/%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95/</guid>
     <description><![CDATA[1 概述 RabbitMQ 是由 erlang 语言开发，基于AMQP（Advanced Message Queue 高级消息队列协议）协议实现的消息队列，它是一种应用程序之间的通信方法，消息队列在分]]></description>
 </item>
 <item>
@@ -42,14 +50,6 @@
     <author>V3NN</author>
     <guid>http://example.org/posts/life/318/</guid>
     <description><![CDATA[2017.08 在路上]]></description>
-</item>
-<item>
-    <title>Markdown 基本语法 1</title>
-    <link>http://example.org/posts/my-first-post/</link>
-    <pubDate>Sun, 01 Dec 2019 21:57:40 &#43;0800</pubDate>
-    <author>Author</author>
-    <guid>http://example.org/posts/my-first-post/</guid>
-    <description><![CDATA[这篇文章提供了可以在 Hugo 的文章中使用的基本 Markdown 语法示例. Note 这篇文章借鉴了一篇很棒的来自 Grav 的文章 . 如果你想了解 Loveit 主题的扩展 Markdown 语法, 请阅读扩展 Markdown 语法]]></description>
 </item>
 </channel>
 </rss>

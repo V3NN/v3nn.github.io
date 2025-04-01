@@ -12,11 +12,11 @@
     <description><![CDATA[1、基本介绍 1.1概述 延时队列是一种队列，内部的元素是有序的，元素出队和入队室友方向性的（元素从一端进入、从另一端取出）。跟普通的队列不一样]]></description>
 </item>
 <item>
-    <title>RabbitMQ 系列1</title>
-    <link>http://example.org/posts/rabbitmq/one/</link>
+    <title>RabbitMQ 基础概念及用法</title>
+    <link>http://example.org/posts/rabbitmq/%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95/</link>
     <pubDate>Mon, 01 Jul 2024 00:00:00 &#43;0000</pubDate>
     <author>v3nn</author>
-    <guid>http://example.org/posts/rabbitmq/one/</guid>
+    <guid>http://example.org/posts/rabbitmq/%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95/</guid>
     <description><![CDATA[1 概述 RabbitMQ 是由 erlang 语言开发，基于AMQP（Advanced Message Queue 高级消息队列协议）协议实现的消息队列，它是一种应用程序之间的通信方法，消息队列在分]]></description>
 </item>
 </channel>
