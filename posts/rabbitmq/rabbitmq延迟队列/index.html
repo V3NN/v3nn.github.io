@@ -79,24 +79,31 @@
                 </div>
                 <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
   <ul>
-    <li><a href="#11概述">1.1概述</a></li>
-    <li><a href="#12为什么要使用延时队列">1.2为什么要使用延时队列</a></li>
-  </ul>
-
-  <ul>
-    <li><a href="#21-实现方式">2.1 实现方式</a></li>
-    <li><a href="#22-优缺点分析">2.2 优缺点分析</a></li>
-  </ul>
-
-  <ul>
-    <li><a href="#31-ttl--dlx">3.1 TTL + DLX</a></li>
-    <li><a href="#32-延迟插件">3.2 延迟插件</a></li>
+    <li><a href="#1基本介绍">1、基本介绍</a>
+      <ul>
+        <li><a href="#11概述">1.1概述</a></li>
+        <li><a href="#12为什么要使用延时队列">1.2为什么要使用延时队列</a></li>
+      </ul>
+    </li>
+    <li><a href="#2原理">2、原理</a>
+      <ul>
+        <li><a href="#21-实现方式">2.1 实现方式</a></li>
+        <li><a href="#22-优缺点分析">2.2 优缺点分析</a></li>
+      </ul>
+    </li>
+    <li><a href="#3代码示例">3、代码示例</a>
+      <ul>
+        <li><a href="#31-ttl--dlx">3.1 TTL + DLX</a></li>
+        <li><a href="#32-延迟插件">3.2 延迟插件</a></li>
+      </ul>
+    </li>
+    <li><a href="#4总结">4、总结</a></li>
   </ul>
 </nav></div>
-            </div><div class="content" id="content"><h1 id="1基本介绍">1、基本介绍</h1>
-<h2 id="11概述">1.1概述</h2>
+            </div><div class="content" id="content"><h2 id="1基本介绍">1、基本介绍</h2>
+<h3 id="11概述">1.1概述</h3>
 <p>延时队列是一种队列，内部的元素是有序的，元素出队和入队室友方向性的（元素从一端进入、从另一端取出）。跟普通的队列不一样的是，普通队列中的元素总是等着希望被早点取出处理，而延时队列中的元素则是希望被在指定时间得到取出和处理，所以延时队列中的元素是都是带时间属性的，通常来说是需要被处理的消息或者任务。</p>
-<h2 id="12为什么要使用延时队列">1.2为什么要使用延时队列</h2>
+<h3 id="12为什么要使用延时队列">1.2为什么要使用延时队列</h3>
 <p>假设有如下场景：</p>
 <ul>
 <li>订单在十分钟之内未支付则自动取消</li>
@@ -107,8 +114,8 @@
 <p>如上这些场景都有一个特点，<strong>需要在某个时间发生之后或者发生之前的指定时间完成某一项任务</strong>。如订单生成后的十分钟内检查订单支付状态，将未支付的订单进行关闭。</p>
 <p>当然除了延时队列，也可以有一些其他办法实现。比如使用定时任务，一直轮询数据，每秒查一次去除需要被处理的数据处理就完事了。</p>
 <p>如果<strong>数据量比较少</strong>，确实可以这样做，但对于<strong>数据量比较大并且时效较强的场景</strong>，短期内未支付的订单可能会很多，对庞大的数据量仍旧使用轮询的方式是不可取的，很可能在一秒内无法完成所有订单的检查，同时会给数据库带来很大压力，无法满足业务要求而且性能低下。</p>
-<h1 id="2原理">2、原理</h1>
-<h2 id="21-实现方式">2.1 实现方式</h2>
+<h2 id="2原理">2、原理</h2>
+<h3 id="21-实现方式">2.1 实现方式</h3>
 <p><code>RabbitMQ</code> 实现延迟队列有以下两种实现方式：</p>
 <ul>
 <li><strong>通过TTL + 死信队列实现延迟任务</strong></li>
@@ -122,7 +129,7 @@
 </ul>
 <p>通过创建一个延迟交换机（<code>Delay Exchange</code>），延迟消息首先会把消息投递到延迟交换机，并不是直接将消息投递业务队列（所以不会立即执行），而是存储到<code>Mnesia</code> ( <code>Erlang</code> 运行时中自带的一个数据库管理系统），等到消息到达可投递时间才会被投递到目标队列中，从而实现延迟队列。</p>
 <div align="center"> <img src="/images/posts/rabbitMQ/delayed/2.png"/></div>
-<h2 id="22-优缺点分析">2.2 优缺点分析</h2>
+<h3 id="22-优缺点分析">2.2 优缺点分析</h3>
 <ul>
 <li>
 <p><strong>使用死信队列存在时序问题，它不能实现随机延迟任务，每个无消费者的队列上只能设置一个 <code>TTL</code>，所以只能实现固定过期时间的延迟任务。</strong></p>
@@ -135,9 +142,9 @@
 </ul>
 </li>
 </ul>
-<h1 id="3代码示例">3、代码示例</h1>
+<h2 id="3代码示例">3、代码示例</h2>
 <p><strong>以下示例使用<code>Docker</code>运行<code>RabbitMQ</code>，<code>PHP</code>进行代码编写并已安装<code>RabbitMQ</code>相应扩展</strong></p>
-<h2 id="31-ttl--dlx">3.1 TTL + DLX</h2>
+<h3 id="31-ttl--dlx">3.1 TTL + DLX</h3>
 <p>编写生产者代码</p>
 <p><strong>producer.php</strong></p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="o">&lt;?</span><span class="nx">php</span>
@@ -281,7 +288,7 @@
 </ul>
 </li>
 </ol>
-<h2 id="32-延迟插件">3.2 延迟插件</h2>
+<h3 id="32-延迟插件">3.2 延迟插件</h3>
 <p>安装对应版本的延迟插件</p>
 <p><a href="https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases" target="_blank" rel="noopener noreffer">https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases</a>
 </p>
@@ -423,7 +430,7 @@
 </span></span></code></pre></div><p>正常情况下，5秒后消费者会返回如下内容。</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">Hello RabbitMQ!-------2025/03/26 17:27:43
 </span></span></code></pre></div><p>至此，延迟插件的延时效果已实现。</p>
-<h1 id="4总结">4、总结</h1>
+<h2 id="4总结">4、总结</h2>
 <ul>
 <li>
 <p><code>RabbitMQ</code> 中可以通过<code>TTL</code> + 死信队列以及官方提供的延迟插件来实现延时任务。</p>

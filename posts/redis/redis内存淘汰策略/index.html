@@ -79,34 +79,42 @@
                 </div>
                 <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
   <ul>
-    <li><a href="#21-定时删除">2.1 定时删除</a></li>
-    <li><a href="#22-惰性删除">2.2 惰性删除</a></li>
-    <li><a href="#23-定期删除-默认策略">2.3 定期删除 (默认策略)</a></li>
-    <li><a href="#24-对比总结">2.4 对比总结</a></li>
-  </ul>
-
-  <ul>
-    <li><a href="#31-淘汰策略介绍">3.1 淘汰策略介绍</a></li>
-    <li><a href="#32-lru-算法">3.2 LRU 算法</a></li>
-    <li><a href="#33-lfu算法">3.3 LFU算法</a></li>
+    <li><a href="#1-前言">1 前言</a></li>
+    <li><a href="#2-过期策略">2 过期策略</a>
+      <ul>
+        <li><a href="#21-定时删除">2.1 定时删除</a></li>
+        <li><a href="#22-惰性删除">2.2 惰性删除</a></li>
+        <li><a href="#23-定期删除-默认策略">2.3 定期删除 (默认策略)</a></li>
+        <li><a href="#24-对比总结">2.4 对比总结</a></li>
+      </ul>
+    </li>
+    <li><a href="#3-内存淘汰策略">3 内存淘汰策略</a>
+      <ul>
+        <li><a href="#31-淘汰策略介绍">3.1 淘汰策略介绍</a></li>
+        <li><a href="#32-lru-算法">3.2 LRU 算法</a></li>
+        <li><a href="#33-lfu算法">3.3 LFU算法</a></li>
+      </ul>
+    </li>
+    <li><a href="#4-相关配置">4 相关配置</a></li>
+    <li><a href="#4-总结">4 总结</a></li>
   </ul>
 </nav></div>
-            </div><div class="content" id="content"><h1 id="1-前言">1 前言</h1>
+            </div><div class="content" id="content"><h2 id="1-前言">1 前言</h2>
 <p><code>Redis</code> 作为当前最常用的开源内存数据库，性能十分高。但是长期将<code>Redis</code>作为缓存使用，难免会遇到内存空间存储瓶颈。</p>
 <p>当<code>Redis</code>内存超出物理内存限制时，内存数据就会与磁盘产生频繁交换，使<code>Redis</code>性能急剧下降，此时如何淘汰无用数据释放空间、存储新数据就变得尤为重要了。</p>
 <p><code>Redis</code> 提供了两种机制配合来达到上述目的：<strong>过期策略</strong>和<strong>内存淘汰机制</strong>。</p>
-<h1 id="2-过期策略">2 过期策略</h1>
+<h2 id="2-过期策略">2 过期策略</h2>
 <p><code>Redis</code>的 <code>key</code> 已经设置了<code>TTL</code>，到期后不会立即从内存中删除，而是先会被标记为过期，等待被访问时(惰性删除)或者通过定期删除机制来清理。</p>
-<h2 id="21-定时删除">2.1 定时删除</h2>
+<h3 id="21-定时删除">2.1 定时删除</h3>
 <p>每个设置了<code>TTL</code>的<code>key</code>都会被放到一个独立的字典中。当<code>key</code>过期时，通过定时器触发删除操作。</p>
 <p>这种方式简单直接，但是会占用额外的内存空间，并且如果过期键非常多，定时器可能会对性能产生影响。</p>
-<h2 id="22-惰性删除">2.2 惰性删除</h2>
+<h3 id="22-惰性删除">2.2 惰性删除</h3>
 <p>每次访问一个<code>key</code>时，<code>Redis</code>都会检查该<code>key</code>是否过期。如果过期就删掉它。</p>
-<h2 id="23-定期删除-默认策略">2.3 定期删除 (默认策略)</h2>
+<h3 id="23-定期删除-默认策略">2.3 定期删除 (默认策略)</h3>
 <p><strong><code>Redis</code>默认每隔 <code>100ms</code>就随机抽取一些设置了<code>TTL</code>的<code>key</code>，检查其是否过期，如果过期就删除，减少内存占用。</strong></p>
 <p>注意这里是随机抽取的。</p>
 <p>为什么要随机呢？假如 <code>Redis</code> 存了几十万个 <code>key</code> ，每隔<code>100ms</code>就遍历所有的设置过期时间的 <code>key</code> 的话，就会给 <code>CPU</code> 带来很大的负担。</p>
-<h2 id="24-对比总结">2.4 对比总结</h2>
+<h3 id="24-对比总结">2.4 对比总结</h3>
 <table>
 <thead>
 <tr>
@@ -138,9 +146,9 @@
 </tbody>
 </table>
 <p>以上三种策略都不是一种完全精准的删除，就还是会存在<code>key</code>没有被删除掉的场景，所以就需要内存淘汰策略进行补充。</p>
-<h1 id="3-内存淘汰策略">3 内存淘汰策略</h1>
+<h2 id="3-内存淘汰策略">3 内存淘汰策略</h2>
 <p><code>Redis</code> 的内存淘汰策略主要用于在内存达到上限（<code>maxmemory</code> 配置的限制）时决定如何删除数据，以便腾出空间存储新数据。</p>
-<h2 id="31-淘汰策略介绍">3.1 淘汰策略介绍</h2>
+<h3 id="31-淘汰策略介绍">3.1 淘汰策略介绍</h3>
 <p><code>Redis</code> 提供了多种淘汰策略，可通过 <code>maxmemory-policy</code> 参数进行配置，常见策略如下：</p>
 <table>
 <thead>
@@ -195,7 +203,7 @@
 </table>
 <p><strong>当使用<code>volatile-lru</code>、<code>volatile-random</code>、<code>volatile-ttl</code>这三种策略时，如果没有<code>key</code>可以被淘汰，则和<code>noeviction</code>一样返回错误。</strong></p>
 <p>另外这里面值得介绍的就是<code>LRU</code>与<code>LFU</code>算法。</p>
-<h2 id="32-lru-算法">3.2 LRU 算法</h2>
+<h3 id="32-lru-算法">3.2 LRU 算法</h3>
 <p><code>LRU</code>是<code>Least Recently Used</code>的缩写，也就是表示最近很少使用，也可以理解成最久没有使用。当内存不够的时候，每次添加一条数据，都需要抛弃一条最久时间没有使用的旧数据。</p>
 <p>需要注意的是<code>Redis</code>并没有使用标准的<code>LRU</code>算法作为<code>LRU</code>淘汰策略的实现方式，这是因为：</p>
 <ul>
@@ -242,7 +250,7 @@
 </ul>
 </li>
 </ul>
-<h2 id="33-lfu算法">3.3 LFU算法</h2>
+<h3 id="33-lfu算法">3.3 LFU算法</h3>
 <p><code>LRU</code>有一个明显的缺点，它无法正确的表示一个<code>key</code>的热度，如果一个<code>key</code>从未被访问过，仅仅发生内存淘汰的前一会儿被用户访问了一下，在<code>LRU</code>算法中这会被认为是一个热<code>key</code>。</p>
 <p>例如下图，如果在<code>LRU</code>处触发淘汰，那么<code>keyA</code>距离的时间最久，但实际上<code>keyA</code>的使用频率要比<code>keyB</code>频繁，所以合理的淘汰策略应该是淘汰<code>keyB</code>。</p>
 <div align="center"> <img src="/images/posts/redis/eliminate/01.png"/></div>
@@ -268,7 +276,7 @@
 <p><strong>淘汰策略</strong>‌：当<code>Redis</code>需要淘汰数据项以释放内存时，它会根据<code>LOG_C</code>的值来选择淘汰哪些数据项。具体地，<code>Redis</code>会维护一个待淘汰数据项的<code>pool</code>，并根据<code>LOG_C</code>的值（经过衰减后）对<code>pool</code>中的数据进行排序，优先淘汰<code>LOG_C</code>值最小的数据项。</p>
 </li>
 </ul>
-<h1 id="4-相关配置">4 相关配置</h1>
+<h2 id="4-相关配置">4 相关配置</h2>
 <p><em>redis.conf</em></p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># 设定redis最大占用内存 单位是字节 可以直观的指定单位 如128mb、1gb</span>
 </span></span><span class="line"><span class="cl">maxmemory &lt;bytes&gt;  
@@ -278,7 +286,7 @@
 </span></span><span class="line"><span class="cl"> 
 </span></span><span class="line"><span class="cl"><span class="c1"># 淘汰算法中最大采样数量</span>
 </span></span><span class="line"><span class="cl">maxmemory-samples <span class="m">5</span>
-</span></span></code></pre></div><h1 id="4-总结">4 总结</h1>
+</span></span></code></pre></div><h2 id="4-总结">4 总结</h2>
 <p>通过合理配置内存淘汰机制，根据具体需求灵活选择合适的策略，从而提高缓存效率、优化系统性能，并确保<code>Redis</code> 在高负载场景下的稳定性。</p>
 <p><strong>配置建议：</strong></p>
 <table>
