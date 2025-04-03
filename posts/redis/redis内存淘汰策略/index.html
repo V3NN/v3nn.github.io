@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <title>Redis的过期策略及内存淘汰机制 - V3NN</title><meta name="Description" content="."><meta property="og:title" content="Redis的过期策略及内存淘汰机制" />
+<meta property="og:description" content="." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://example.org/posts/redis/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5/" /><meta property="og:image" content="http://example.org/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-07-11T00:00:00+00:00" />
+<meta property="article:modified_time" content="2024-07-11T00:00:00+00:00" /><meta property="og:site_name" content="我的网站" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://example.org/logo.png"/>
+
+<meta name="twitter:title" content="Redis的过期策略及内存淘汰机制"/>
+<meta name="twitter:description" content="."/>
+<meta name="application-name" content="My cool site">
+<meta name="apple-mobile-web-app-title" content="My cool site"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://example.org/posts/redis/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5/" /><link rel="prev" href="http://example.org/posts/rabbitmq/%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95/" /><link rel="next" href="http://example.org/posts/mysql/%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Redis的过期策略及内存淘汰机制",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/example.org\/posts\/redis\/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5\/"
+        },"genre": "posts","keywords": "Redis","wordcount":  3049 ,
+        "url": "http:\/\/example.org\/posts\/redis\/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5\/","datePublished": "2024-07-11T00:00:00+00:00","dateModified": "2024-07-11T00:00:00+00:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "v3nn"
+            },"description": "."
+    }
+    </script></head>
+    <body data-header-desktop="fixed" data-header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="V3NN">V3NN</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="V3NN">V3NN</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+            </a></div>
+    </div>
+</header><main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content always-active" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Redis的过期策略及内存淘汰机制</h1><div class="post-meta">
+            
+            <div class="post-meta-line">
+</div>
+        </div><div class="details toc" id="toc-static"  data-kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right" aria-hidden="true"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#21-定时删除">2.1 定时删除</a></li>
+    <li><a href="#22-惰性删除">2.2 惰性删除</a></li>
+    <li><a href="#23-定期删除-默认策略">2.3 定期删除 (默认策略)</a></li>
+    <li><a href="#24-对比总结">2.4 对比总结</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#31-淘汰策略介绍">3.1 淘汰策略介绍</a></li>
+    <li><a href="#32-lru-算法">3.2 LRU 算法</a></li>
+    <li><a href="#33-lfu算法">3.3 LFU算法</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h1 id="1-前言">1 前言</h1>
+<p><code>Redis</code> 作为当前最常用的开源内存数据库，性能十分高。但是长期将<code>Redis</code>作为缓存使用，难免会遇到内存空间存储瓶颈。</p>
+<p>当<code>Redis</code>内存超出物理内存限制时，内存数据就会与磁盘产生频繁交换，使<code>Redis</code>性能急剧下降，此时如何淘汰无用数据释放空间、存储新数据就变得尤为重要了。</p>
+<p><code>Redis</code> 提供了两种机制配合来达到上述目的：<strong>过期策略</strong>和<strong>内存淘汰机制</strong>。</p>
+<h1 id="2-过期策略">2 过期策略</h1>
+<p><code>Redis</code>的 <code>key</code> 已经设置了<code>TTL</code>，到期后不会立即从内存中删除，而是先会被标记为过期，等待被访问时(惰性删除)或者通过定期删除机制来清理。</p>
+<h2 id="21-定时删除">2.1 定时删除</h2>
+<p>每个设置了<code>TTL</code>的<code>key</code>都会被放到一个独立的字典中。当<code>key</code>过期时，通过定时器触发删除操作。</p>
+<p>这种方式简单直接，但是会占用额外的内存空间，并且如果过期键非常多，定时器可能会对性能产生影响。</p>
+<h2 id="22-惰性删除">2.2 惰性删除</h2>
+<p>每次访问一个<code>key</code>时，<code>Redis</code>都会检查该<code>key</code>是否过期。如果过期就删掉它。</p>
+<h2 id="23-定期删除-默认策略">2.3 定期删除 (默认策略)</h2>
+<p><strong><code>Redis</code>默认每隔 <code>100ms</code>就随机抽取一些设置了<code>TTL</code>的<code>key</code>，检查其是否过期，如果过期就删除，减少内存占用。</strong></p>
+<p>注意这里是随机抽取的。</p>
+<p>为什么要随机呢？假如 <code>Redis</code> 存了几十万个 <code>key</code> ，每隔<code>100ms</code>就遍历所有的设置过期时间的 <code>key</code> 的话，就会给 <code>CPU</code> 带来很大的负担。</p>
+<h2 id="24-对比总结">2.4 对比总结</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">策略</th>
+<th style="text-align:center">触发时机</th>
+<th style="text-align:center">优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">定时删除</td>
+<td style="text-align:center"><code>TTL</code>到期</td>
+<td style="text-align:center">简单直接，节约内存，到时就删除，快速释放掉不必要的内存占用</td>
+<td>无论<code>CPU</code>此时负载量多高，均占用<code>CPU</code>，<code>CPU</code>压力很大，会影响<code>Redis</code>服务器响应时间和指令吞吐量</td>
+</tr>
+<tr>
+<td style="text-align:center">惰性删除</td>
+<td style="text-align:center">访问<code>key</code>时</td>
+<td style="text-align:center">减少了定时器的压力，节省了<code>CPU</code>性能</td>
+<td>1. 可能在某些情况下导致大量工作集中在短时间内完成，影响性能。<br />2. 并且会出现过期<code>key</code>长时间未被访问，占用内存</td>
+</tr>
+<tr>
+<td style="text-align:center">定期删除（默认策略）</td>
+<td style="text-align:center"><code>Redis</code>定时任务（默认<code>100ms</code>/次）</td>
+<td style="text-align:center">能够主动释放部分过期的<code>key</code>，避免内存溢出</td>
+<td>无法确保所有过期的<code>key</code>都被及时删除，部分<code>key</code>仍可能滞留在内存</td>
+</tr>
+</tbody>
+</table>
+<p>以上三种策略都不是一种完全精准的删除，就还是会存在<code>key</code>没有被删除掉的场景，所以就需要内存淘汰策略进行补充。</p>
+<h1 id="3-内存淘汰策略">3 内存淘汰策略</h1>
+<p><code>Redis</code> 的内存淘汰策略主要用于在内存达到上限（<code>maxmemory</code> 配置的限制）时决定如何删除数据，以便腾出空间存储新数据。</p>
+<h2 id="31-淘汰策略介绍">3.1 淘汰策略介绍</h2>
+<p><code>Redis</code> 提供了多种淘汰策略，可通过 <code>maxmemory-policy</code> 参数进行配置，常见策略如下：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">策略</th>
+<th style="text-align:center">释义</th>
+<th style="text-align:center">场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>noeviction</strong> - 拒绝新写入</td>
+<td style="text-align:center">不会淘汰任何数据，当使用的内存空间超过 <code>maxmemory </code>值时，再有写请求来时返回错误</td>
+<td style="text-align:center">适用于严格限制数据丢失的场景，如用户 <code>session</code> 、缓存预热或全量数据存储</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>volatile-lru</strong> - 最近最少使用次数</td>
+<td style="text-align:center">从所有配置了<code>TTL</code>的<code>key</code>中驱逐最久没有使用的<code>key</code></td>
+<td style="text-align:center">适用于缓存，只淘汰可过期的<code>key</code>，保留重要数据</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>allkeys-lru</strong> - 使用<code>lru</code>算法淘汰所有 <code>key</code></td>
+<td style="text-align:center"><code>Redis</code> 根据 <code>LRU</code> 算法淘汰最近最少使用的所有<code>key</code>（无论是否有<code>TTL</code>）都可以参与淘汰</td>
+<td style="text-align:center">适用于高性能缓存，确保经常访问的数据优先保留</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>volatile-lfu</strong> - 最近最少使用频率</td>
+<td style="text-align:center">从所有配置了<code>TTL</code>的<code>key</code>中驱逐使用频率最少的<code>key</code></td>
+<td style="text-align:center">适用于访问频率不均衡的缓存，淘汰低频访问的过期 <code>key</code></td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>allkeys-lfu</strong> -  使用<code>lfu</code>算法淘汰所有 <code>key</code></td>
+<td style="text-align:center"><code>Redis</code> 根据 <code>LFU</code> 算法淘汰最近最少使用的所有<code>key</code>（无论是否有<code>TTL</code>）都可以参与淘汰</td>
+<td style="text-align:center">适用于热点数据，确保最常访问的数据留存</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>volatile-random</strong> - 随机淘汰</td>
+<td style="text-align:center">仅针对设置了<code>TTL</code>的 <code>key</code> 进行随机淘汰</td>
+<td style="text-align:center">适用于非热点数据缓存，随机清理部分过期数据</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>allkeys-random</strong> - 所有<code>key</code> 随机淘汰</td>
+<td style="text-align:center">所有<code>key</code> 都可以被随机淘汰，而不考虑<code>LRU</code>或<code>LFU</code></td>
+<td style="text-align:center">适用于数据无访问优先级的场景，如消息队列</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>volatile-ttl</strong> - 根据 TTL 淘汰</td>
+<td style="text-align:center">从配置了<code>TTL</code>的键中驱逐马上就要过期的<code>key</code></td>
+<td style="text-align:center">数据都有过期时间，且剩余生命周期具有明显规律，适用于短时缓存，如临时验证码存</td>
+</tr>
+</tbody>
+</table>
+<p><strong>当使用<code>volatile-lru</code>、<code>volatile-random</code>、<code>volatile-ttl</code>这三种策略时，如果没有<code>key</code>可以被淘汰，则和<code>noeviction</code>一样返回错误。</strong></p>
+<p>另外这里面值得介绍的就是<code>LRU</code>与<code>LFU</code>算法。</p>
+<h2 id="32-lru-算法">3.2 LRU 算法</h2>
+<p><code>LRU</code>是<code>Least Recently Used</code>的缩写，也就是表示最近很少使用，也可以理解成最久没有使用。当内存不够的时候，每次添加一条数据，都需要抛弃一条最久时间没有使用的旧数据。</p>
+<p>需要注意的是<code>Redis</code>并没有使用标准的<code>LRU</code>算法作为<code>LRU</code>淘汰策略的实现方式，这是因为：</p>
+<ul>
+<li>
+<p><strong>要实现<code>LRU</code>，需要将所有数据维护一个链表，这就需额外内存空间来保存链表</strong></p>
+</li>
+<li>
+<p><strong>每当有新数据插入或现有数据被再次访问，都要调整链表中节点的位置，尤其是频繁的操作将会造成巨大的开销</strong></p>
+</li>
+</ul>
+<p>为了解决这一问题，<code>Redis</code>使用了近似的<code>LRU</code>策略进行了优化：</p>
+<ul>
+<li>
+<p><strong>关键结构</strong>： 每个<code>Redis</code>对象（<code>redisObject</code>）的<code>LRU</code>字段（24位）记录访问时间戳（单位：秒级精度）。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">redisObject</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="nl">type</span><span class="p">:</span><span class="mi">4</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="nl">encoding</span><span class="p">:</span><span class="mi">4</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="nl">lru</span><span class="p">:</span><span class="n">LRU_BITS</span><span class="p">;</span>  <span class="c1">// LRU_BITS=24
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">refcount</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">robj</span><span class="p">;</span>
+</span></span></code></pre></div></li>
+<li>
+<p><strong>淘汰流程</strong>：</p>
+<ul>
+<li>
+<p><strong>随机采样</strong>：从所有键中随机选取<code>maxmemory-samples</code>（默认5）个<code>key</code></p>
+</li>
+<li>
+<p><strong>淘汰候选</strong>：选择采样集中<code>lru</code>最小的键（即最久未访问）</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp"># 源码入口 evict.c/evictionPoolPopulate()
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">evictionPoolPopulate</span><span class="p">(</span><span class="kt">int</span> <span class="n">dbid</span><span class="p">,</span> <span class="n">dict</span> <span class="o">*</span><span class="n">sampledict</span><span class="p">,</span> <span class="n">dict</span> <span class="o">*</span><span class="n">keydict</span><span class="p">,</span> <span class="k">struct</span> <span class="n">evictionPoolEntry</span> <span class="o">*</span><span class="n">pool</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 随机采样键，计算idle时间（当前时间 - lru）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">for</span> <span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">count</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 计算idle时间
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">server</span><span class="p">.</span><span class="n">maxmemory_policy</span> <span class="o">&amp;</span> <span class="n">MAXMEMORY_FLAG_LRU</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">idle</span> <span class="o">=</span> <span class="nf">estimateObjectIdleTime</span><span class="p">(</span><span class="n">o</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 维护淘汰池，保留idle最大的键
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div></li>
+</ul>
+</li>
+</ul>
+<h2 id="33-lfu算法">3.3 LFU算法</h2>
+<p><code>LRU</code>有一个明显的缺点，它无法正确的表示一个<code>key</code>的热度，如果一个<code>key</code>从未被访问过，仅仅发生内存淘汰的前一会儿被用户访问了一下，在<code>LRU</code>算法中这会被认为是一个热<code>key</code>。</p>
+<p>例如下图，如果在<code>LRU</code>处触发淘汰，那么<code>keyA</code>距离的时间最久，但实际上<code>keyA</code>的使用频率要比<code>keyB</code>频繁，所以合理的淘汰策略应该是淘汰<code>keyB</code>。</p>
+<div align="center"> <img src="/images/posts/redis/eliminate/01.png"/></div>
+<p><code>LFU</code>就是为应对这种情况而生的。</p>
+<p><code>LFU</code>在<code>redis 4.0</code>后出现，相比<code>LRU</code>算法，<code>LFU</code>增加了访问频率的这样一个维度来统计数据的热点情况，<code>LFU</code>主要使用了两个双向链表去形成一个二维的双向链表，一个用来保存访问频率，另一个用来访问频率相同的所有元素，其内部按照访问时间排序。</p>
+<ul>
+<li>
+<p><strong>数据结构</strong>‌：<code>Redis</code>使用<code>redisObject </code>结构体来表示每个数据项，该结构体中有一个<code>lru</code>字段，在<code>LFU</code>模式下，这个字段被分为两部分使用：高16位用于记录最近一次计数器降低的时间（Last Decrement Time，简称<code>LDT</code>），低8位用于记录访问频次（Logistic Counter，简称<code>LOG_C</code>）。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">redisObject</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="nl">type</span><span class="p">:</span><span class="mi">4</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="nl">encoding</span><span class="p">:</span><span class="mi">4</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="nl">lru</span><span class="p">:</span><span class="n">LRU_BITS</span><span class="p">;</span> <span class="cm">/* LRU time (relative to global lru_clock) or
+</span></span></span><span class="line"><span class="cl"><span class="cm">                            * LFU data (least significant 8 bits frequency
+</span></span></span><span class="line"><span class="cl"><span class="cm">                            * and most significant 16 bits access time). */</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">refcount</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">robj</span><span class="p">;</span>
+</span></span></code></pre></div></li>
+<li>
+<p>‌<strong>计数器更新</strong>：每次数据项被访问时，<code>Redis</code>会尝试增加其<code>LOG_C</code>的值。但是，为了避免<code>LOG_C</code>快速膨胀到最大值，<code>Redis</code>采用了一种对数增长的方式，即每次增加的概率与当前<code>LOG_C</code>的值成反比。此外，随着时间的推移，<code>LOG_C</code>的值会逐渐衰减，以反映访问模式的变化。</p>
+</li>
+<li>
+<p><strong>淘汰策略</strong>‌：当<code>Redis</code>需要淘汰数据项以释放内存时，它会根据<code>LOG_C</code>的值来选择淘汰哪些数据项。具体地，<code>Redis</code>会维护一个待淘汰数据项的<code>pool</code>，并根据<code>LOG_C</code>的值（经过衰减后）对<code>pool</code>中的数据进行排序，优先淘汰<code>LOG_C</code>值最小的数据项。</p>
+</li>
+</ul>
+<h1 id="4-相关配置">4 相关配置</h1>
+<p><em>redis.conf</em></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># 设定redis最大占用内存 单位是字节 可以直观的指定单位 如128mb、1gb</span>
+</span></span><span class="line"><span class="cl">maxmemory &lt;bytes&gt;  
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 指定使用哪种内存淘汰策略 </span>
+</span></span><span class="line"><span class="cl">maxmemory-policy noevictio  
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="c1"># 淘汰算法中最大采样数量</span>
+</span></span><span class="line"><span class="cl">maxmemory-samples <span class="m">5</span>
+</span></span></code></pre></div><h1 id="4-总结">4 总结</h1>
+<p>通过合理配置内存淘汰机制，根据具体需求灵活选择合适的策略，从而提高缓存效率、优化系统性能，并确保<code>Redis</code> 在高负载场景下的稳定性。</p>
+<p><strong>配置建议：</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">算法</th>
+<th style="text-align:center">核心指标</th>
+<th style="text-align:center">实现要点</th>
+<th style="text-align:center">类比</th>
+<th style="text-align:center">场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>LRU</code></td>
+<td style="text-align:center">最近访问时间</td>
+<td style="text-align:center">近似采样 + 时间戳比较</td>
+<td style="text-align:center">图书馆最近借阅的书籍</td>
+<td style="text-align:center">适用于突发访问场景，保留最近热点数</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>LFU</code></td>
+<td style="text-align:center">访问频率</td>
+<td style="text-align:center">概率计数 + 时间衰减</td>
+<td style="text-align:center">热门排行榜（热度会下降）</td>
+<td style="text-align:center">适用于长尾访问分布，保留高频访问数据</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>TTL</code></td>
+<td style="text-align:center">剩余存活时间</td>
+<td style="text-align:center">过期字典 + <code>TTL</code>排序</td>
+<td style="text-align:center">食品保质期倒计时</td>
+<td style="text-align:center">适用于明确生命周期的数据（如会话信息）</td>
+</tr>
+</tbody>
+</table>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2024-07-11</span>
+            </div></div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://example.org/posts/redis/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5/" data-hashtag="Redis"><i class="fab fa-facebook-square fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Hacker News" data-sharer="hackernews" data-url="http://example.org/posts/redis/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5/" data-title="Redis的过期策略及内存淘汰机制"><i class="fab fa-hacker-news fa-fw" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://example.org/posts/redis/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5/" data-title="Redis的过期策略及内存淘汰机制"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@6.20.0/icons/line.svg" aria-hidden="true"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://example.org/posts/redis/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5/" data-title="Redis的过期策略及内存淘汰机制"><i class="fab fa-weibo fa-fw" aria-hidden="true"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw" aria-hidden="true"></i>&nbsp;<a href="/tags/redis/">Redis</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/posts/rabbitmq/%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95/" class="prev" rel="prev" title="RabbitMQ 基础概念及用法"><i class="fas fa-angle-left fa-fw" aria-hidden="true"></i>RabbitMQ 基础概念及用法</a>
+            <a href="/posts/mysql/%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88/" class="next" rel="next" title="MySQL索引失效的几种情况">MySQL索引失效的几种情况<i class="fas fa-angle-right fa-fw" aria-hidden="true"></i></a></div>
+</div>
+</article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line" itemscope itemtype="http://schema.org/CreativeWork"><i class="far fa-copyright fa-fw" aria-hidden="true"></i><span itemprop="copyrightYear">2020 - 2025</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">V3NN</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw" aria-hidden="true"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw" aria-hidden="true"></i>
+            </a>
+        </div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.3/dist/katex.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.3/dist/contrib/copy-tex.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.3.1/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.5.1/sharer.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/katex@0.15.3/dist/katex.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/katex@0.15.3/dist/contrib/auto-render.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/katex@0.15.3/dist/contrib/copy-tex.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/katex@0.15.3/dist/contrib/mhchem.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":60},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":true,"left":"\\begin{equation}","right":"\\end{equation}"},{"display":true,"left":"\\begin{equation*}","right":"\\end{equation*}"},{"display":true,"left":"\\begin{align}","right":"\\end{align}"},{"display":true,"left":"\\begin{align*}","right":"\\end{align*}"},{"display":true,"left":"\\begin{alignat}","right":"\\end{alignat}"},{"display":true,"left":"\\begin{alignat*}","right":"\\end{alignat*}"},{"display":true,"left":"\\begin{gather}","right":"\\end{gather}"},{"display":true,"left":"\\begin{CD}","right":"\\end{CD}"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

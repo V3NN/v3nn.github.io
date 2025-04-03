@@ -22,6 +22,14 @@
     <description><![CDATA[在MySQL中，索引是提高数据库查询效率的关键组件。然而在某些情况下索引可能会失效，导致查询性能下降。 以下是几种常见的索引失效情况： 模糊查询]]></description>
 </item>
 <item>
+    <title>Redis的过期策略及内存淘汰机制</title>
+    <link>http://example.org/posts/redis/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5/</link>
+    <pubDate>Thu, 11 Jul 2024 00:00:00 &#43;0000</pubDate>
+    <author>v3nn</author>
+    <guid>http://example.org/posts/redis/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5/</guid>
+    <description><![CDATA[1 前言 Redis 作为当前最常用的开源内存数据库，性能十分高。但是长期将Redis作为缓存使用，难免会遇到内存空间存储瓶颈。 当Redis内存超出物理内]]></description>
+</item>
+<item>
     <title>RabbitMQ 基础概念及用法</title>
     <link>http://example.org/posts/rabbitmq/%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95/</link>
     <pubDate>Mon, 01 Jul 2024 00:00:00 &#43;0000</pubDate>
@@ -36,14 +44,6 @@
     <author>Author</author>
     <guid>http://example.org/posts/mysql/jsonfunction/</guid>
     <description><![CDATA[1. 介绍 JSON(JavaScript Object Notation) 是一种轻量级的数据交换格式，目前常用于前后段数据传输。 MySQL 从 5.7.8 版本开始提供 JSON 数据类型及相关函数，其通过新增JSON对象类型和相应的]]></description>
-</item>
-<item>
-    <title>Redis的过期策略及内存淘汰机制</title>
-    <link>http://example.org/posts/redis/taotaijizhi/</link>
-    <pubDate>Tue, 11 Jul 2023 00:00:00 &#43;0000</pubDate>
-    <author>v3nn</author>
-    <guid>http://example.org/posts/redis/taotaijizhi/</guid>
-    <description><![CDATA[Redis 作为当前最常用的开源内存数据库，性能十分高。但是长期将Redis作为缓存使用，难免会遇到内存空间存储瓶颈，当Redis内存超出物理内存限制]]></description>
 </item>
 <item>
     <title>318国道川藏南线</title>

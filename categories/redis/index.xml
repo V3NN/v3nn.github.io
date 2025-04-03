@@ -3,13 +3,13 @@
         <title>Redis - Category - V3NN</title>
         <link>http://example.org/categories/redis/</link>
         <description>Redis - Category - V3NN</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Tue, 11 Jul 2023 00:00:00 &#43;0000</lastBuildDate><atom:link href="http://example.org/categories/redis/" rel="self" type="application/rss+xml" /><item>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 11 Jul 2024 00:00:00 &#43;0000</lastBuildDate><atom:link href="http://example.org/categories/redis/" rel="self" type="application/rss+xml" /><item>
     <title>Redis的过期策略及内存淘汰机制</title>
-    <link>http://example.org/posts/redis/taotaijizhi/</link>
-    <pubDate>Tue, 11 Jul 2023 00:00:00 &#43;0000</pubDate>
+    <link>http://example.org/posts/redis/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5/</link>
+    <pubDate>Thu, 11 Jul 2024 00:00:00 &#43;0000</pubDate>
     <author>v3nn</author>
-    <guid>http://example.org/posts/redis/taotaijizhi/</guid>
-    <description><![CDATA[Redis 作为当前最常用的开源内存数据库，性能十分高。但是长期将Redis作为缓存使用，难免会遇到内存空间存储瓶颈，当Redis内存超出物理内存限制]]></description>
+    <guid>http://example.org/posts/redis/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5/</guid>
+    <description><![CDATA[1 前言 Redis 作为当前最常用的开源内存数据库，性能十分高。但是长期将Redis作为缓存使用，难免会遇到内存空间存储瓶颈。 当Redis内存超出物理内]]></description>
 </item>
 </channel>
 </rss>
